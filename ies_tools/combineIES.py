@@ -55,13 +55,17 @@ def __loadIES(fname):
 
     # {# of horizontal angles} {photometric type} {units type} {width}
     # {length} {height}
-    lm = float(data.split(' ')[1])
-    cdMulti = float(data.split(' ')[2])
-    v_angle = int(data.split(' ')[3])
-    h_angle = int(data.split(' ')[4])
-    width = float(data.split(' ')[7])
-    length = float(data.split(' ')[8])
-    height = float(data.split(' ')[9])
+    properties = data.split(' ')
+    lamps = int(properties[0])
+    lm = float(properties[1])
+    cdMulti = float(properties[2])
+    v_angle = int(properties[3])
+    h_angle = int(properties[4])
+    photometric_type = int(properties[5])
+    units_type = int(properties[6])
+    width = float(properties[7])
+    length = float(properties[8])
+    height = float(properties[9])
 
     dataW = fid.readline()
     # 1 1 inputWatts
@@ -74,32 +78,32 @@ def __loadIES(fname):
     arr = arr[v_angle + h_angle:]
     arr = arr.reshape((h_angle, -1))
 
-    return(header, lm, cdMulti, dataW, v_angle, h_angle, phi, th, arr,
-           width, length, height)
+    return(header, lamps, lm, cdMulti, dataW, v_angle,
+           h_angle, photometric_type, units_type, phi, th, arr, width, length, height)
 
 
 def main():
     parser = argparse.ArgumentParser(
         description='This tool combines two IES files to one. \
-                 First file is upper, second lower part.')
+                 First file is upper, second lower part. Power and Lamp count is not combined, but taken from DownLight.')
 
     parser.add_argument("upper", help="Upward light")
     parser.add_argument("lower", help="Downward light")
     parser.add_argument("-n", "--no_flip_upper",
-                        help="Flip the upper file over",
+                        help="Do not flip the upper file over",
                         action='store_true')
     parser.add_argument("-o", "--out", help="Out file")
     parser.add_argument("-s", "--scale_upper",
                         help="Scale the upper file to match the lower \
-                        file based on ovelapping area, phi=90deg",
+                        file based on ovelapping area at plane phi=90deg",
                         action='store_true')
     args = parser.parse_args()
 
     # Load datas
-    (headerU, lmU, cdMultiU, dataWU, v_angleU, h_angleU, phiU, thU, arrU,
+    (headerU, lampsU, lmU, cdMultiU, dataWU, v_angleU, h_angleU, photometric_typeU, units_typeU, phiU, thU, arrU,
      width, length, height) = \
         __loadIES(args.upper)
-    (headerD, lmD, cdMultiD, dataWD, v_angleD, h_angleD, phiD, thD, arrD,
+    (headerD, lampsD, lmD, cdMultiD, dataWD, v_angleD, h_angleD, photometric_typeD, units_typeD, phiD, thD, arrD,
      width, length, height) = \
         __loadIES(args.lower)
 
@@ -158,8 +162,9 @@ def main():
         foutN = args.out
     fout = open(foutN, 'w')
     fout.writelines(headerU)
-    fout.write('1 %f %f %d %d 1 2 %f %f %f\n' % (lmD + lmU, cdMultiD,
+    fout.write('%d %f %f %d %d %d %d %f %f %f\n' % (lampsD, lmD + lmU, cdMultiD,
                                                  len(phiI), len(thI),
+                                                 photometric_typeD, units_typeD,
                                                  width, length, height))
 
     fout.write(dataWU)

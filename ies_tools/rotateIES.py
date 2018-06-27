@@ -59,13 +59,17 @@ def __loadIES(fname):
 
     # {# of horizontal angles} {photometric type} {units type} {width}
     # {length} {height}
-    lm = float(data.split(' ')[1])
-    cdMulti = float(data.split(' ')[2])
-    v_angle = int(data.split(' ')[3])
-    h_angle = int(data.split(' ')[4])
-    width = float(data.split(' ')[7])
-    length = float(data.split(' ')[8])
-    height = float(data.split(' ')[9])
+    properties = data.split(' ')
+    lamps = int(properties[0])
+    lm = float(properties[1])
+    cdMulti = float(properties[2])
+    v_angle = int(properties[3])
+    h_angle = int(properties[4])
+    photometric_type = int(properties[5])
+    units_type = int(properties[6])
+    width = float(properties[7])
+    length = float(properties[8])
+    height = float(properties[9])
 
     dataW = fid.readline()
     # 1 1 inputWatts
@@ -78,8 +82,8 @@ def __loadIES(fname):
     arr = arr[v_angle + h_angle:]
     arr = arr.reshape((h_angle, -1))
 
-    return(header, lm, cdMulti, dataW, v_angle,
-           h_angle, phi, th, arr, width, length, height)
+    return(header, lamps, lm, cdMulti, dataW, v_angle,
+           h_angle, photometric_type, units_type, phi, th, arr, width, length, height)
 
 
 def main():
@@ -97,8 +101,8 @@ def main():
     args = parser.parse_args()
 
     # Load datas
-    (headerU, lmU, cdMultiU, dataWU, v_angleU,
-     h_angleU, phiU, thU, arrU, width, length, height) = \
+    (headerU, lamps, lmU, cdMultiU, dataWU, v_angleU,
+     h_angleU, photometric_type, units_type, phiU, thU, arrU, width, length, height) = \
         __loadIES(args.file)
 
     # Symmetrise arrays if nescesary
@@ -140,9 +144,9 @@ def main():
         foutN = args.out
     fout = open(foutN, 'w')
     fout.writelines(headerU)
-    fout.write('1 %f %f %d %d 1 2 %f %f %f\n' % (lmU, cdMultiU,
+    fout.write('%d %f %f %d %d %d %d %f %f %f\n' % (lamps, lmU, cdMultiU,
                                                  len(phiI), len(thI),
-                                                 width, length, height))
+                                                 photometric_type, units_type, width, length, height))
 
     fout.write(dataWU)
     j = 1
