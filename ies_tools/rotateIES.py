@@ -61,8 +61,8 @@ def __loadIES(fname):
     # {length} {height}
     lm = float(data.split(' ')[1])
     cdMulti = float(data.split(' ')[2])
-    v_angle = float(data.split(' ')[3])
-    h_angle = float(data.split(' ')[4])
+    v_angle = int(data.split(' ')[3])
+    h_angle = int(data.split(' ')[4])
     width = float(data.split(' ')[7])
     length = float(data.split(' ')[8])
     height = float(data.split(' ')[9])
